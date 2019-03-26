@@ -5,7 +5,6 @@
 import numpy as np
 
 #TODO:
-# forward
 # backward
 class Softmax:
 
@@ -13,6 +12,11 @@ class Softmax:
         self.x_in = x_in
 
     def forward(self):
-        
-        return 
+        ex = np.exp(self.x_in)
+        sum_ex = np.sum(np.exp(self.x_in))
+        return ex/sum_ex
+
+    def backward(self):
+
+        return
         

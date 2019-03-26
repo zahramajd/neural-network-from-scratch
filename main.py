@@ -10,7 +10,10 @@ from loss import Loss
 # softmax node
 # loss node
 
-n = Layer(np.array([[1,2,3],[3,2,1]]),np.array([[3,4,5,6],[3,4,5,6],[3,4,5,6]]),'ReLU')
-o = n.forward()
-print(o)
+# n = Layer(np.array([[1,2,3],[3,2,1]]),np.array([[3,4,5,6],[3,4,5,6],[3,4,5,6]]),'ReLU')
+# o = n.forward()
+# print(o)
 
+s = Softmax([1,2,3])
+
+print(s.forward())
