@@ -5,6 +5,8 @@
 # Xout = f(Xin*W)
 import numpy as np
 
+#TODO:
+# backward
 class Layer:
 
     def __init__(self, x_in, w, activation):
@@ -33,3 +35,7 @@ class Layer:
             return 1
         return 0
     
+    def backward(self,upstream_gradient):
+        local_gradient = 1
+        gradient = upstream_gradient * local_gradient
+        return gradient
