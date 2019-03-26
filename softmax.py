@@ -12,11 +12,13 @@ class Softmax:
         self.x_in = x_in
 
     def forward(self):
-        ex = np.exp(self.x_in)
-        sum_ex = np.sum(np.exp(self.x_in))
-        return ex/sum_ex
+        return self.softmax(self.x_in)
 
     def backward(self):
 
         return
         
+    def softmax(self,x):
+        ex = np.exp(x)
+        sum_ex = np.sum(np.exp(x))
+        return ex/sum_ex

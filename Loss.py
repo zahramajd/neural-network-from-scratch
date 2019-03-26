@@ -5,7 +5,6 @@
 import numpy as np
 
 #TODO:
-# forward
 # backward
 class Loss:
 
@@ -13,6 +12,11 @@ class Loss:
         self.y = y
         self.y_p = y_p
 
-    def loss(self):
+    def forward(self):
+        return self.cross_entropy(self.y_p, self.y)
 
-        return
+    def cross_entropy(self,predictions, targets, epsilon=1e-12):
+        predictions = np.clip(predictions, epsilon, 1. - epsilon)
+        N = predictions.shape[0]
+        ce = -np.sum(targets*np.log(predictions+1e-9))/N
+        return ce

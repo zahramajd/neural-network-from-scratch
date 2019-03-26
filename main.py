@@ -15,5 +15,9 @@ from loss import Loss
 # print(o)
 
 s = Softmax([1,2,3])
+y_p=s.forward()
+y=[1,0,0]
 
-print(s.forward())
+l = Loss(y_p= y_p, y=y)
+
+print(l.forward())
