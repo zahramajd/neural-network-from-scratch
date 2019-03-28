@@ -51,12 +51,11 @@ class Layer:
         x_out = self.activation_function(z)
         return x_out, z
 
-    def backward(self, dx_out, w, b, z, x_in):
+    def backward(self, dx_out, z, x_in):
         m = x_in.shape[1]
-
         dz = self.derivative_activation_function(dx_out, z)
         dw = np.dot(dz, x_in.T) / m
         db = np.sum(dz, axis=1, keepdims=True) / m
-        dx_in = np.dot(w.T, dz)
+        dx_in = np.dot(self.w.T, dz)
 
         return dx_in, dw, db

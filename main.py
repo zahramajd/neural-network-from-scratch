@@ -6,6 +6,7 @@ from loss import Loss
 
 ###
 # w is w.T
+# loss & softmax aren't layer
 
 # make layers
 layers = []
@@ -59,19 +60,40 @@ def forward_network(x_in_network,layers):
 
     return x_out, memory
 
+def backward_network(Y_hat, Y, memory, layers):
+    grads_values = {}
+    
+    m = Y.shape[1]
+    Y = Y.reshape(Y_hat.shape)
+    
+    dx_in = - (np.divide(Y, Y_hat) - np.divide(1 - Y, 1 - Y_hat));
+    
+    for layer_idx_prev, layer in reversed(list(enumerate(layers))):
+        layer_idx_curr = layer_idx_prev + 1
+        
+        dx_out = dx_in
+        
+        x_in = memory["A" + str(layer_idx_prev)]
+        z = memory["Z" + str(layer_idx_curr)]
+
+        dx_in, dw, db = layer.backward(dx_out, z, x_in)
+        
+        grads_values["dW" + str(layer_idx_curr)] = dw
+        grads_values["db" + str(layer_idx_curr)] = db
+    return grads_values
+
 def train(X, layers):
     params_values = initialize(layers)
 
     return
 
+## to be changed
 
+def get_cost_value(Y_hat, Y):
+    m = Y_hat.shape[1]
+    cost = -1 / m * (np.dot(Y, np.log(Y_hat).T) + np.dot(1 - Y, np.log(1 - Y_hat).T))
+    return np.squeeze(cost)
 
-from sklearn.datasets import make_moons
-from sklearn.model_selection import train_test_split
-
-N_SAMPLES = 1000
-TEST_SIZE = 0.1
-X, y = make_moons(n_samples = N_SAMPLES, noise=0.2, random_state=100)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=42)
-
-train(X_train, layers)
+def get_accuracy_value(Y_hat, Y):
+    Y_hat_ = convert_prob_into_class(Y_hat)
+    return (Y_hat_ == Y).all(axis=0).mean()
