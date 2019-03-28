@@ -13,8 +13,8 @@ class Layer:
         self.input_dimension = input_dimension
         self.output_dimension = output_dimension
         # changable variables
-        self.w = 0
-        self.b = 0
+        # self.w = 0
+        # self.b = 0
 
 
     def ReLU(self,z):
@@ -39,23 +39,23 @@ class Layer:
             return self.sigmoid(input)
         return 0
 
-    def derivative_activation_function(self, input):
+    def derivative_activation_function(self, dA, z):
         if(self.activation == 'ReLU'):
-            return self.derivative_ReLU(input)
+            return self.derivative_ReLU(dA, z)
         if(self.activation == 'sigmoid'):
-            return self.derivative_sigmoid(input)
+            return self.derivative_sigmoid(dA, z)
         return 0
 
-    def forward(self, x_in):       
-        z = np.dot(self.w, x_in) + self.b
+    def forward(self, x_in, w, b):       
+        z = np.dot(w, x_in) + b
         x_out = self.activation_function(z)
         return x_out, z
 
-    def backward(self, dx_out, z, x_in):
+    def backward(self, dx_out, w, b,z, x_in):
         m = x_in.shape[1]
         dz = self.derivative_activation_function(dx_out, z)
         dw = np.dot(dz, x_in.T) / m
         db = np.sum(dz, axis=1, keepdims=True) / m
-        dx_in = np.dot(self.w.T, dz)
+        dx_in = np.dot(w.T, dz)
 
         return dx_in, dw, db
