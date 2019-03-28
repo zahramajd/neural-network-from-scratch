@@ -46,8 +46,8 @@ class Layer:
             return self.derivative_sigmoid(input)
         return 0
 
-    def forward(self, x_in, w, b):       
-        z = np.dot(w, x_in) + b
+    def forward(self, x_in):       
+        z = np.dot(self.w, x_in) + self.b
         x_out = self.activation_function(z)
         return x_out, z
 
