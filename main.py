@@ -82,6 +82,15 @@ def backward_network(Y_hat, Y, memory, layers):
         grads_values["db" + str(layer_idx_curr)] = db
     return grads_values
 
+
+def update(grads_values, layers, learning_rate):
+    for layer_idx, layer in enumerate(layers):
+        layer.w -= learning_rate * grads_values["dW" + str(layer_idx)] 
+        layer.b -= learning_rate * grads_values["db" + str(layer_idx)] 
+    return 
+
+
+
 def train(X, layers):
     params_values = initialize(layers)
 
