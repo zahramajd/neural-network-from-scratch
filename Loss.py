@@ -1,22 +1,21 @@
+import numpy as np
 
 # YP: N*10
 # Y: N*1
 # L=CrossEntropy(YP, Y)
-import numpy as np
 
-#TODO:
-# backward
+
 class Loss:
 
-    def __init__(self, y, y_p):
-        self.y = y
-        self.y_p = y_p
+    def __init__(self, Y_hat, Y):
+        self.Y_hat = Y_hat
+        self.Y = Y
 
     def forward(self):
-        return self.cross_entropy(self.y_p, self.y)
+        m = self.Y_hat.shape[1]
+        cost = -1 / m * (np.dot(self.Y, np.log(self.Y_hat).T) + np.dot(1 - self.Y, np.log(1 - self.Y_hat).T))
+        return np.squeeze(cost)
 
-    def cross_entropy(self,predictions, targets, epsilon=1e-12):
-        predictions = np.clip(predictions, epsilon, 1. - epsilon)
-        N = predictions.shape[0]
-        ce = -np.sum(targets*np.log(predictions+1e-9))/N
-        return ce
+    def backward(self):
+        dx_in = - (np.divide(self.Y, self.Y_hat) - np.divide(1 - self.Y, 1 - self.Y_hat))
+        return dx_in

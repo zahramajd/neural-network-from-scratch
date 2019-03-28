@@ -57,13 +57,13 @@ def forward_network(x_in_network, params_values,layers):
 
     return x_out, memory
 
-def backward_network(Y_hat, Y, memory, params_values, layers):
+def backward_network(Y_hat, Y, memory, params_values, layers, loss):
     grads_values = {}
     
     m = Y.shape[1]
     Y = Y.reshape(Y_hat.shape)
     
-    dx_in = - (np.divide(Y, Y_hat) - np.divide(1 - Y, 1 - Y_hat));
+    dx_in = loss.backward()
     
     for layer_idx_prev, layer in reversed(list(enumerate(layers))):
         layer_idx_curr = layer_idx_prev + 1
@@ -97,13 +97,14 @@ def train(X, Y, layers, epochs, learning_rate):
     for i in range(epochs):
         Y_hat, cache = forward_network(X, params_values,layers)
 
-        cost = get_cost_value(Y_hat, Y)
+        loss = Loss(Y_hat, Y)
+        cost = loss.forward()
         cost_history.append(cost)
         accuracy = get_accuracy_value(Y_hat, Y)
         accuracy_history.append(accuracy)
         
-        grads_values = backward_network(Y_hat, Y, cache, params_values,layers)
-        params_values =update(params_values ,grads_values, layers, learning_rate)
+        grads_values = backward_network(Y_hat, Y, cache, params_values,layers, loss)
+        params_values = update(params_values ,grads_values, layers, learning_rate)
 
     return  params_values
 
@@ -113,11 +114,6 @@ def train(X, Y, layers, epochs, learning_rate):
 
 from sklearn.datasets import make_moons
 from sklearn.model_selection import train_test_split
-
-def get_cost_value(Y_hat, Y):
-    m = Y_hat.shape[1]
-    cost = -1 / m * (np.dot(Y, np.log(Y_hat).T) + np.dot(1 - Y, np.log(1 - Y_hat).T))
-    return np.squeeze(cost)
 
 def get_accuracy_value(Y_hat, Y):
     Y_hat_ = convert_prob_into_class(Y_hat)
@@ -142,7 +138,6 @@ params_values =train(np.transpose(X_train), np.transpose(y_train.reshape((y_trai
 
 # Prediction
 Y_test_hat, _ = forward_network(np.transpose(X_test), params_values,layers)
-
 
 # Accuracy achieved on the test set
 acc_test = get_accuracy_value(Y_test_hat, np.transpose(y_test.reshape((y_test.shape[0], 1))))
