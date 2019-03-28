@@ -4,20 +4,44 @@ from layer import Layer
 from softmax import Softmax
 from loss import Loss
 
+###
+# w is w.T
 
-#TODO:
-# layer node 
-# softmax node
-# loss node
+# make layers
+layers = []
+layers.append(Layer(input_dimension=2, output_dimension=4, activation='ReLU'))
+layers.append(Layer(input_dimension=4, output_dimension=6, activation='ReLU'))
+layers.append(Layer(input_dimension=6, output_dimension=6, activation='ReLU'))
+layers.append(Layer(input_dimension=6, output_dimension=4, activation='ReLU'))
+layers.append(Layer(input_dimension=4, output_dimension=1, activation='sigmoid'))
 
-# n = Layer(np.array([[1,2,3],[3,2,1]]),np.array([[3,4,5,6],[3,4,5,6],[3,4,5,6]]),'ReLU')
-# o = n.forward()
-# print(o)
 
-s = Softmax([1,2,3])
-y_p=s.forward()
-y=[1,0,0]
+def initialize(layers):
+    params_values = {}
+    np.random.seed(2)
 
-l = Loss(y_p= y_p, y=y)
+    for index,layer in enumerate(layers):
+        layer_idx = index + 1
+        layer_input_size = layer.input_dimension
+        layer_output_size = layer.output_dimension
 
-print(l.forward())
+        layer.w = np.random.randn(
+            layer_output_size, layer_input_size) * 0.1
+
+        layer.b = np.random.randn(
+            layer_output_size, 1) * 0.1
+        
+        ## to be removed
+        params_values['W' + str(layer_idx)] = np.random.randn(
+            layer_output_size, layer_input_size) * 0.1
+        params_values['b' + str(layer_idx)] = np.random.randn(
+            layer_output_size, 1) * 0.1
+
+    return params_values
+
+def train():
+    params_values = initialize(layers)
+
+    return
+
+train()

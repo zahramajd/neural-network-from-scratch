@@ -8,13 +8,14 @@ import numpy as np
 
 class Layer:
 
-    def __init__(self, x_in, w, b, activation):
-        self.x_in = x_in
-        self.w = w
-        self.b = b
+    def __init__(self, input_dimension, output_dimension, activation):
         self.activation = activation
-        self.x_out = 0
-        self.z = 0
+        self.input_dimension = input_dimension
+        self.output_dimension = output_dimension
+        # changable variables
+        self.w = 0
+        self.b = 0
+
 
     def ReLU(self,z):
         return np.maximum(0,z)
@@ -45,18 +46,17 @@ class Layer:
             return self.derivative_sigmoid(input)
         return 0
 
-    def forward(self):       
-        self.z = np.dot(self.w, self.x_in) + self.b
-        self.x_out = self.activation_function(self.z)
-        return self.x_out, self.z
+    def forward(self, x_in, w, b):       
+        z = np.dot(w, x_in) + b
+        x_out = self.activation_function(z)
+        return x_out, z
 
-    def backward(self,dx_out):
+    def backward(self, dx_out, w, b, z, x_in):
+        m = x_in.shape[1]
 
-        m = self.x_in.shape[1]
-
-        dz = self.derivative_activation_function(dx_out, self.z)
-        dw = np.dot(dz, self.x_in.T) / m
+        dz = self.derivative_activation_function(dx_out, z)
+        dw = np.dot(dz, x_in.T) / m
         db = np.sum(dz, axis=1, keepdims=True) / m
-        dx_in = np.dot(self.w.T, dz)
+        dx_in = np.dot(w.T, dz)
 
         return dx_in, dw, db
