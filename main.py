@@ -138,35 +138,46 @@ def make_feature_vector(data):
         row_index += 1
     return feature_vector
 
+def one_hot(a, num_classes):
+      return np.squeeze(np.eye(num_classes)[a.reshape(-1)])
+
+
 ####### main
 train_data, train_labels ,test_data ,test_labels  = load_data()
 
 train_data = make_feature_vector(train_data)
 test_data = make_feature_vector(test_data)
 
+train_labels = one_hot(np.asarray(train_labels),10)
+test_labels = one_hot(np.asarray(test_labels),10)
+
 ###########################################################
 ## to be changed
 
-# from sklearn.datasets import make_moons
-# from sklearn.model_selection import train_test_split
+from sklearn.datasets import make_moons
+from sklearn.model_selection import train_test_split
 
-# def get_accuracy_value(Y_hat, Y):
-#     Y_hat_ = convert_prob_into_class(Y_hat)
-#     return (Y_hat_ == Y).all(axis=0).mean()
+def get_accuracy_value(Y_hat, Y):
+    Y_hat_ = convert_prob_into_class(Y_hat)
+    return (Y_hat_ == Y).all(axis=0).mean()
 
-# def convert_prob_into_class(probs):
-#     probs_ = np.copy(probs)
-#     probs_[probs_ > 0.5] = 1
-#     probs_[probs_ <= 0.5] = 0
-#     return probs_
+def convert_prob_into_class(probs):
+    probs_ = np.copy(probs)
+    probs_[probs_ > 0.5] = 1
+    probs_[probs_ <= 0.5] = 0
+    return probs_
 
-# # number of samples in the data set
-# N_SAMPLES = 1000
-# # ratio between training and test sets
-# TEST_SIZE = 0.1
+# number of samples in the data set
+N_SAMPLES = 1000
+# ratio between training and test sets
+TEST_SIZE = 0.1
 
-# X, y = make_moons(n_samples = N_SAMPLES, noise=0.2, random_state=100)
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=42)
+X, y = make_moons(n_samples = N_SAMPLES, noise=0.2, random_state=100)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=42)
+
+y_train = one_hot(y_train, 2)
+y_test = one_hot(y_test, 2)
+
 
 # # Training
 # params_values =train(np.transpose(X_train), np.transpose(y_train.reshape((y_train.shape[0], 1))), layers, epochs=10000,learning_rate=0.01)
