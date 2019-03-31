@@ -132,7 +132,7 @@ def make_feature_vector(data):
     feature_vector = np.zeros((10000, 1024))
     row_index = 0
     for row in  data:
-        for i in range(0, 1023):
+        for i in range(0, 1024):
             avg = (row[i] + row[i+1024] + row[i+2048])/3
             feature_vector[row_index][i] = avg
         row_index += 1
@@ -142,8 +142,8 @@ def make_feature_vector(data):
 train_data, train_labels ,test_data ,test_labels  = load_data()
 
 train_data = make_feature_vector(train_data)
+test_data = make_feature_vector(test_data)
 
-print(train_data.shape)
 ###########################################################
 ## to be changed
 
