@@ -60,7 +60,11 @@ def backprop(y, cache):
     loss = Loss(cache[-1], y)
     loss_value = loss.forward()
 
-    print('Error :', loss_value)
+    dA = loss.backward() #a3_delta
+    for index,layer in reversed(list(enumerate(layers))):
+
+        dZ = np.dot(dA, layer.w.T) 
+        dA = dZ * layer.backward(cache[index-1])
 
     return
 

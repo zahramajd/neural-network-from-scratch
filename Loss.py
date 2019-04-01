@@ -16,3 +16,9 @@ class Loss:
         logp = - np.log(self.Y_hat[np.arange(n_samples), self.Y.argmax(axis=1)])
         loss = np.sum(logp)/n_samples
         return loss
+
+    def backward(self):
+        n_samples = self.Y.shape[0]
+        res = self.Y_hat - self.Y
+        return res/n_samples
+        

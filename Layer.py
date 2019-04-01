@@ -22,6 +22,11 @@ class Layer:
         a = self.sigmoid(z)
         return a
 
+    def backward(self, a):
+        return self.sigmoid_derv(a)
 
     def sigmoid(self ,s):
         return 1/(1 + np.exp(-s))
+
+    def sigmoid_derv(s):
+        return s * (1 - s)
