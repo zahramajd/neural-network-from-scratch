@@ -49,6 +49,8 @@ from sklearn.model_selection import train_test_split
 def feedforward(x):
     cache = []
     x_in = x
+    cache.append(x_in)
+
     for index,layer in enumerate(layers):
         x_out = layer.forward(x_in)
         x_in = x_out
@@ -57,16 +59,34 @@ def feedforward(x):
     return cache
 
 def backprop(y, cache):
+    derivative_w = []    
+    derivative_b = []
+
     loss = Loss(cache[-1], y)
     loss_value = loss.forward()
+    
+    print(loss_value)
 
-    dA = loss.backward() #a3_delta
-    for index,layer in reversed(list(enumerate(layers))):
+    dA = loss.backward()
+    for index,layer in reversed(list(enumerate(layers))[1:]):
+        derivative_w.append(np.dot(cache[index].T,dA))
+        derivative_b.append(np.sum(dA, axis=0, keepdims=True))
 
         dZ = np.dot(dA, layer.w.T) 
-        dA = dZ * layer.backward(cache[index-1])
+        dA = dZ * layer.backward(cache[index])
 
-    return
+    derivative_w.append(np.dot(cache[0].T, dA))
+    derivative_b.append(np.sum(dA, axis=0))
+
+    derivative_w = derivative_w[::-1]
+    derivative_b = derivative_b[::-1]
+
+    return derivative_w, derivative_b
+
+def update(lr, derivative_w, derivative_b):
+    for index, layer in enumerate(layers):
+        layer.w -= lr * derivative_w[index]
+        layer.b -= lr * derivative_b[index]
 
 dig = load_digits()
 onehot_target = pd.get_dummies(dig.target)
@@ -90,6 +110,5 @@ cache = []
 epochs = 150
 for i in range(epochs):
     cache = feedforward(x)
-    backprop(y, cache)
-
-
+    derivative_w, derivative_b = backprop(y, cache)
+    update(lr, derivative_w, derivative_b)

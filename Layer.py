@@ -28,5 +28,5 @@ class Layer:
     def sigmoid(self ,s):
         return 1/(1 + np.exp(-s))
 
-    def sigmoid_derv(s):
+    def sigmoid_derv(self ,s):
         return s * (1 - s)
