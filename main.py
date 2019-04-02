@@ -77,25 +77,33 @@ def predict(data):
     cache = feedforward(data)
     return cache[-1].argmax()
 
+def load_new_data():
+    train_data, train_labels ,test_data ,test_labels  = load_data()
+    train_data = make_feature_vector(train_data)
+    test_data = make_feature_vector(test_data)
+    train_labels = one_hot(np.asarray(train_labels),10)
+    test_labels = one_hot(np.asarray(test_labels),10)
 
-# train_data, train_labels ,test_data ,test_labels  = load_data()
+    np.savetxt('train_data.txt', train_data, fmt='%f')
+    np.savetxt('test_data.txt', test_data, fmt='%f')
+    np.savetxt('train_labels.txt', train_labels, fmt='%f')
+    np.savetxt('test_labels.txt', test_labels, fmt='%f')
 
-# train_data = make_feature_vector(train_data)
-# test_data = make_feature_vector(test_data)
+    return train_data, test_data, train_labels, test_labels
 
-# train_labels = one_hot(np.asarray(train_labels),10)
-# test_labels = one_hot(np.asarray(test_labels),10)
+def load_data_from_file():
+    train_data = np.loadtxt('train_data.txt', dtype=float)
+    test_data = np.loadtxt('test_data.txt', dtype=float)
+    train_labels = np.loadtxt('train_labels.txt', dtype=float)
+    test_labels = np.loadtxt('test_labels.txt', dtype=float)
 
-# np.savetxt('train_data.txt', train_data, fmt='%f')
-# np.savetxt('test_data.txt', test_data, fmt='%f')
-# np.savetxt('train_labels.txt', train_labels, fmt='%f')
-# np.savetxt('test_labels.txt', test_labels, fmt='%f')
+    return train_data, test_data, train_labels, test_labels
 
-train_data = np.loadtxt('train_data.txt', dtype=float)
-test_data = np.loadtxt('test_data.txt', dtype=float)
-train_labels = np.loadtxt('train_labels.txt', dtype=float)
-test_labels = np.loadtxt('test_labels.txt', dtype=float)
 
+
+# train_data, test_data, train_labels, test_labels = load_new_data()
+
+train_data, test_data, train_labels, test_labels = load_data_from_file()
 
 x = train_data
 y = np.array(train_labels)
