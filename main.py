@@ -31,21 +31,6 @@ def make_feature_vector(data):
 def one_hot(a, num_classes):
       return np.squeeze(np.eye(num_classes)[a.reshape(-1)])
 
-
-
-# train_data, train_labels ,test_data ,test_labels  = load_data()
-
-# train_data = make_feature_vector(train_data)
-# test_data = make_feature_vector(test_data)
-
-# train_labels = one_hot(np.asarray(train_labels),10)
-# test_labels = one_hot(np.asarray(test_labels),10)
-
-
-import pandas as pd
-from sklearn.datasets import load_digits
-from sklearn.model_selection import train_test_split
-
 def feedforward(x):
     cache = []
     x_in = x
@@ -64,7 +49,7 @@ def backprop(y, cache):
 
     loss = Loss(cache[-1], y)
     loss_value = loss.forward()
-    
+
     print(loss_value)
 
     dA = loss.backward()
@@ -88,27 +73,57 @@ def update(lr, derivative_w, derivative_b):
         layer.w -= lr * derivative_w[index]
         layer.b -= lr * derivative_b[index]
 
-dig = load_digits()
-onehot_target = pd.get_dummies(dig.target)
-x_train, x_val, y_train, y_val = train_test_split(dig.data, onehot_target, test_size=0.1, random_state=20)
+def predict(data):
+    cache = feedforward(data)
+    return cache[-1].argmax()
 
-x = x_train/16.0
-y = np.array(y_train)
+
+# train_data, train_labels ,test_data ,test_labels  = load_data()
+
+# train_data = make_feature_vector(train_data)
+# test_data = make_feature_vector(test_data)
+
+# train_labels = one_hot(np.asarray(train_labels),10)
+# test_labels = one_hot(np.asarray(test_labels),10)
+
+# np.savetxt('train_data.txt', train_data, fmt='%f')
+# np.savetxt('test_data.txt', test_data, fmt='%f')
+# np.savetxt('train_labels.txt', train_labels, fmt='%f')
+# np.savetxt('test_labels.txt', test_labels, fmt='%f')
+
+train_data = np.loadtxt('train_data.txt', dtype=float)
+test_data = np.loadtxt('test_data.txt', dtype=float)
+train_labels = np.loadtxt('train_labels.txt', dtype=float)
+test_labels = np.loadtxt('test_labels.txt', dtype=float)
+
+
+x = train_data
+y = np.array(train_labels)
 lr = 0.5
 
 
 # make layers
 layers = []
-layers.append(Layer(input_dimension=64, output_dimension=128, activation='sigmoid'))
+layers.append(Layer(input_dimension=1024, output_dimension=128, activation='sigmoid'))
 layers.append(Layer(input_dimension=128, output_dimension=128, activation='sigmoid'))
 ##
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
-
 cache = []
 
-epochs = 150
+epochs = 1500
 for i in range(epochs):
     cache = feedforward(x)
     derivative_w, derivative_b = backprop(y, cache)
     update(lr, derivative_w, derivative_b)
+
+def get_acc(x, y):
+    acc = 0
+    for xx,yy in zip(x, y):
+        s = predict(xx)
+        if s == np.argmax(yy):
+            acc +=1
+    return acc/len(x)*100
+	
+# print("Training accuracy : ", get_acc(x_train, np.array(y_train)))
+# print("Test accuracy : ", get_acc(x_val, np.array(y_val)))

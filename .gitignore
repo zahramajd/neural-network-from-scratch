@@ -11,3 +11,7 @@ cifar-10-batches-py/test_batch
 *.pyc
 temp
 ah.py
+train_labels.txt
+test_data.txt
+test_labels.txt
+train_data.txt
