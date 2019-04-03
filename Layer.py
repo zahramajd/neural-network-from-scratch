@@ -19,14 +19,31 @@ class Layer:
 
     def forward(self, x_in):
         z = np.dot(x_in, self.w) + self.b
-        a = self.sigmoid(z)
+        # a = self.sigmoid(z)
+        if(self.activation == 'relu'):
+            a = self.relu(z)
+        if(self.activation == 'sigmoid'):
+            a = self.sigmoid(z)
         return a
 
     def backward(self, a):
-        return self.sigmoid_derv(a)
+        if(self.activation == 'relu'):
+            da = self.relu_derv(a)
+        if(self.activation == 'sigmoid'):
+            da = self.sigmoid_derv(a)
+
+        return da
 
     def sigmoid(self ,s):
         return 1/(1 + np.exp(-s))
 
     def sigmoid_derv(self ,s):
         return s * (1 - s)
+
+    def relu(self, s):
+        return np.maximum(0,s)
+
+    def relu_derv(self, s):
+        ds = np.ones(s.shape)
+        ds[s <= 0] = 0
+        return ds

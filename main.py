@@ -112,7 +112,7 @@ def plot_loss(losses, epochs):
 
 # make layers
 layers = []
-layers.append(Layer(input_dimension=1024, output_dimension=512, activation='sigmoid'))
+layers.append(Layer(input_dimension=1024, output_dimension=512, activation='relu'))
 layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
