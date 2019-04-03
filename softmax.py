@@ -4,8 +4,6 @@ import numpy as np
 # Xout: N*10
 # Xout = softmax(Xin)
 
-#TODO:
-# backward
 
 class Softmax:
 

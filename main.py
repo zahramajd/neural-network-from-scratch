@@ -12,11 +12,12 @@ def load_data():
             dict = pickle.load(fo, encoding='bytes')
         return dict
 
-    train_data = unpickle('cifar-10-batches-py/data_batch_1')[b'data']
-    train_labels = unpickle('cifar-10-batches-py/data_batch_1')[b'labels']
-    test_data = unpickle('cifar-10-batches-py/test_batch')[b'data']
-    test_labels = unpickle('cifar-10-batches-py/test_batch')[b'labels']
-    return train_data, train_labels, test_data, test_labels
+    train_data = unpickle('cifar-10-batches-py/data_batch_5')[b'data']
+    train_labels = unpickle('cifar-10-batches-py/data_batch_5')[b'labels']
+
+    # test_data = unpickle('cifar-10-batches-py/test_batch')[b'data']
+    # test_labels = unpickle('cifar-10-batches-py/test_batch')[b'labels']
+    return train_data, train_labels
 
 def make_feature_vector(data):
     feature_vector = np.zeros((10000, 1024))
@@ -78,42 +79,39 @@ def predict(data):
     return cache[-1].argmax()
 
 def load_new_data():
-    train_data, train_labels ,test_data ,test_labels  = load_data()
+    train_data, train_labels   = load_data()
+
     train_data = make_feature_vector(train_data)
-    test_data = make_feature_vector(test_data)
+    # test_data = make_feature_vector(test_data)
     train_labels = one_hot(np.asarray(train_labels),10)
-    test_labels = one_hot(np.asarray(test_labels),10)
+    # test_labels = one_hot(np.asarray(test_labels),10)
 
-    np.savetxt('train_data.txt', train_data, fmt='%f')
-    np.savetxt('test_data.txt', test_data, fmt='%f')
-    np.savetxt('train_labels.txt', train_labels, fmt='%f')
-    np.savetxt('test_labels.txt', test_labels, fmt='%f')
+    np.savetxt('converted_data/train_data_5.txt', train_data, fmt='%f')
+    # np.savetxt('converted_data/test_data.txt', test_data, fmt='%f')
 
-    return train_data, test_data, train_labels, test_labels
+    np.savetxt('converted_data/train_labels_5.txt', train_labels, fmt='%f')
+    # np.savetxt('converted_data/test_labels.txt', test_labels, fmt='%f')
 
-def load_data_from_file():
-    train_data = np.loadtxt('train_data.txt', dtype=float)
-    test_data = np.loadtxt('test_data.txt', dtype=float)
-    train_labels = np.loadtxt('train_labels.txt', dtype=float)
-    test_labels = np.loadtxt('test_labels.txt', dtype=float)
+    return train_data, train_labels
 
-    return train_data, test_data, train_labels, test_labels
+def load_test_from_file():
+    test_data = np.loadtxt('converted_data/test_data.txt', dtype=float)
+    test_labels = np.loadtxt('converted_data/test_labels.txt', dtype=float)
 
+    return  test_data, test_labels
 
+def load_batch_data_from_file(index):
+    train_data = np.loadtxt('converted_data/train_data_' + str(index) + '.txt', dtype=float)
+    train_labels = np.loadtxt('converted_data/train_labels_' + str(index) + '.txt', dtype=float)
 
-# train_data, test_data, train_labels, test_labels = load_new_data()
+    return  train_data, train_labels
 
-train_data, test_data, train_labels, test_labels = load_data_from_file()
-
-x = train_data
-y = np.array(train_labels)
 lr = 0.5
-
 
 # make layers
 layers = []
-layers.append(Layer(input_dimension=1024, output_dimension=128, activation='sigmoid'))
-layers.append(Layer(input_dimension=128, output_dimension=128, activation='sigmoid'))
+layers.append(Layer(input_dimension=1024, output_dimension=512, activation='sigmoid'))
+layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
 ##
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
@@ -121,6 +119,10 @@ cache = []
 
 epochs = 1500
 for i in range(epochs):
+
+    train_data, train_labels = load_batch_data_from_file(1)
+    x = train_data
+    y = train_labels
     cache = feedforward(x)
     derivative_w, derivative_b = backprop(y, cache)
     update(lr, derivative_w, derivative_b)
