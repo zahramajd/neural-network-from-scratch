@@ -112,20 +112,23 @@ lr = 0.5
 layers = []
 layers.append(Layer(input_dimension=1024, output_dimension=512, activation='sigmoid'))
 layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
-##
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
 cache = []
 
 epochs = 1500
 for i in range(epochs):
+    print('epoch number: ', i)
+    for batch in range(5):
+        print('batch number: ', batch+1)
+        train_data, train_labels = load_batch_data_from_file(batch+1)
 
-    train_data, train_labels = load_batch_data_from_file(1)
-    x = train_data
-    y = train_labels
-    cache = feedforward(x)
-    derivative_w, derivative_b = backprop(y, cache)
-    update(lr, derivative_w, derivative_b)
+        x = train_data
+        y = train_labels
+
+        cache = feedforward(x)
+        derivative_w, derivative_b = backprop(y, cache)
+        update(lr, derivative_w, derivative_b)
 
 def get_acc(x, y):
     acc = 0
