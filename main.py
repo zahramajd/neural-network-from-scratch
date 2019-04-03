@@ -1,9 +1,9 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from layer import Layer
 from softmax import Softmax
 from loss import Loss
-
 
 def load_data():
     def unpickle(file):
@@ -51,7 +51,7 @@ def backprop(y, cache):
     loss = Loss(cache[-1], y)
     loss_value = loss.forward()
 
-    print(loss_value)
+    # print(loss_value)
 
     dA = loss.backward()
     for index,layer in reversed(list(enumerate(layers))[1:]):
@@ -67,7 +67,7 @@ def backprop(y, cache):
     derivative_w = derivative_w[::-1]
     derivative_b = derivative_b[::-1]
 
-    return derivative_w, derivative_b
+    return derivative_w, derivative_b, loss_value
 
 def update(lr, derivative_w, derivative_b):
     for index, layer in enumerate(layers):
@@ -106,7 +106,9 @@ def load_batch_data_from_file(index):
 
     return  train_data, train_labels
 
-lr = 0.5
+def plot_loss(losses, epochs):
+    plt.plot(epochs, losses, color='red')
+    
 
 # make layers
 layers = []
@@ -114,11 +116,17 @@ layers.append(Layer(input_dimension=1024, output_dimension=512, activation='sigm
 layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
-cache = []
+# learning rate
+lr = 0.5
 
-epochs = 1500
+epochs = 3
+losses = []
+epochs_num = []
+
 for i in range(epochs):
     print('epoch number: ', i)
+    avg_loss = 0.
+
     for batch in range(5):
         print('batch number: ', batch+1)
         train_data, train_labels = load_batch_data_from_file(batch+1)
@@ -127,9 +135,21 @@ for i in range(epochs):
         y = train_labels
 
         cache = feedforward(x)
-        derivative_w, derivative_b = backprop(y, cache)
+        derivative_w, derivative_b, loss = backprop(y, cache)
         update(lr, derivative_w, derivative_b)
 
+        avg_loss += loss
+    
+    avg_loss = avg_loss/5
+    print('avg ', avg_loss)
+    losses.append(avg_loss)
+    epochs_num.append(i)
+
+plot_loss(losses, epochs_num)
+plt.show()
+
+
+#############
 def get_acc(x, y):
     acc = 0
     for xx,yy in zip(x, y):
