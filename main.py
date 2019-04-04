@@ -135,13 +135,14 @@ def Adagrad_optimizer(derivative, cache_layers, learning_rate = 0.01):
 
     return opt_values, cache_layers
 
-def RMSProp_optimizer(derivative, learning_rate, cache):
+def RMSProp_optimizer(derivative, cache_layers, learning_rate = 0.01):
     decay_rate = 0.01
+    opt_values = []
+    for index, layer in enumerate(layers):
+        cache_layers[index] = decay_rate * cache_layers[index] + (1- decay_rate) * np.power(derivative[index], 2)
+        opt_values.append(learning_rate * derivative[index] / (np.sqrt(cache_layers[index]) + 1e-7))
 
-    cache = decay_rate * cache + (1- decay_rate) * np.power(derivative, 2)
-    opt_value = learning_rate * derivative / (np.sqrt(cache) + 1e-7)
-
-    return opt_value
+    return opt_values, cache_layers
 
 def update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b):
     for index, layer in enumerate(layers):
@@ -287,5 +288,49 @@ def adagrad():
     plot_loss(losses, epochs_num)
 
 def RMSProp():
+    epochs = 10
+    losses = []
+    epochs_num = []
 
-    return
+    cache_weight_layers = []
+    cache_bias_layers = []
+
+
+    for i in range(epochs):
+        print('epoch number: ', i)
+        avg_loss = 0.
+
+        for batch in range(5):
+            print('batch number: ', batch+1)
+            train_data, train_labels = load_batch_data_from_file(batch+1)
+
+            x = train_data
+            y = train_labels
+
+            cache = feedforward(x)
+            derivative_w, derivative_b, loss = backprop(y, cache)
+
+            # initialize
+            if(batch == 0):
+                for index, layer in enumerate(layers):
+                    cache_weight_layers.append(np.zeros(derivative_w[index].shape))
+                    cache_bias_layers.append(np.zeros(derivative_b[index].shape))
+
+
+            opt_values_weight, cache_weight_layers = RMSProp_optimizer(derivative=derivative_w, cache_layers=cache_weight_layers, learning_rate=0.01)
+
+            opt_values_bias, cache_bias_layers = RMSProp_optimizer(derivative=derivative_b, 
+            cache_layers=cache_bias_layers, learning_rate=0.01)
+
+            update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b)
+
+            avg_loss += loss
+        
+        avg_loss = avg_loss/5
+        print('avg ', avg_loss)
+        losses.append(avg_loss)
+        epochs_num.append(i)
+
+    plot_loss(losses, epochs_num)
+
+RMSProp()
