@@ -19,6 +19,34 @@ def load_data():
     # test_labels = unpickle('cifar-10-batches-py/test_batch')[b'labels']
     return train_data, train_labels
 
+def load_new_data():
+    train_data, train_labels  = load_data()
+
+    train_data = make_feature_vector(train_data)
+    # test_data = make_feature_vector(test_data)
+    train_labels = one_hot(np.asarray(train_labels),10)
+    # test_labels = one_hot(np.asarray(test_labels),10)
+
+    np.savetxt('converted_data/train_data_5.txt', train_data, fmt='%f')
+    # np.savetxt('converted_data/test_data.txt', test_data, fmt='%f')
+
+    np.savetxt('converted_data/train_labels_5.txt', train_labels, fmt='%f')
+    # np.savetxt('converted_data/test_labels.txt', test_labels, fmt='%f')
+
+    return train_data, train_labels
+
+def load_test_from_file():
+    test_data = np.loadtxt('converted_data/test_data.txt', dtype=float)
+    test_labels = np.loadtxt('converted_data/test_labels.txt', dtype=float)
+
+    return  test_data, test_labels
+
+def load_batch_data_from_file(index):
+    train_data = np.loadtxt('converted_data/train_data_' + str(index) + '.txt', dtype=float)
+    train_labels = np.loadtxt('converted_data/train_labels_' + str(index) + '.txt', dtype=float)
+
+    return  train_data, train_labels
+
 def make_feature_vector(data):
     feature_vector = np.zeros((10000, 1024))
     row_index = 0
@@ -74,38 +102,6 @@ def update(lr, derivative_w, derivative_b):
         layer.w -= lr * derivative_w[index]
         layer.b -= lr * derivative_b[index]
 
-def predict(data):
-    cache = feedforward(data)
-    return cache[-1].argmax()
-
-def load_new_data():
-    train_data, train_labels   = load_data()
-
-    train_data = make_feature_vector(train_data)
-    # test_data = make_feature_vector(test_data)
-    train_labels = one_hot(np.asarray(train_labels),10)
-    # test_labels = one_hot(np.asarray(test_labels),10)
-
-    np.savetxt('converted_data/train_data_5.txt', train_data, fmt='%f')
-    # np.savetxt('converted_data/test_data.txt', test_data, fmt='%f')
-
-    np.savetxt('converted_data/train_labels_5.txt', train_labels, fmt='%f')
-    # np.savetxt('converted_data/test_labels.txt', test_labels, fmt='%f')
-
-    return train_data, train_labels
-
-def load_test_from_file():
-    test_data = np.loadtxt('converted_data/test_data.txt', dtype=float)
-    test_labels = np.loadtxt('converted_data/test_labels.txt', dtype=float)
-
-    return  test_data, test_labels
-
-def load_batch_data_from_file(index):
-    train_data = np.loadtxt('converted_data/train_data_' + str(index) + '.txt', dtype=float)
-    train_labels = np.loadtxt('converted_data/train_labels_' + str(index) + '.txt', dtype=float)
-
-    return  train_data, train_labels
-
 def plot_loss(losses, epochs):
     plt.plot(epochs, losses, color='red')
     
@@ -149,14 +145,16 @@ def update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b):
         layer.w -= opt_values_weight[index] * derivative_w[index]
         layer.b -= opt_values_bias[index] * derivative_b[index]
 
+def predict():
+    test_data, test_labels = load_test_from_file()
+    
+    return 
 
-# make layers
-layers = []
-layers.append(Layer(input_dimension=1024, output_dimension=512, activation='lrelu'))
-layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
-layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
+def compute_accuracy():
 
+    return
 
+## methods
 def gradient_decsent():
 
     #learning rate
@@ -333,4 +331,13 @@ def RMSProp():
 
     plot_loss(losses, epochs_num)
 
-gradient_decsent()
+
+# make layers
+layers = []
+layers.append(Layer(input_dimension=1024, output_dimension=512, activation='lrelu'))
+layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
+layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
+
+
+# gradient_decsent()
+predict()
