@@ -109,20 +109,22 @@ def load_batch_data_from_file(index):
 def plot_loss(losses, epochs):
     plt.plot(epochs, losses, color='red')
     
-def Adam_optimizer(derivative, learning_rate, epoch, m, v):
+def Adam_optimizer(derivative, epoch, m, v, learning_rate = 0.01):
     
     beta1 = 0.9
     beta2 = 0.999
 
-    m = beta1 * m + (1-beta1)* derivative
-    v = beta2 * v + (1-beta2) * (np.power(derivative, 2))
+    opt_values = []
+    for index, layer in enumerate(layers):
+        m[index] = beta1 * m[index] + (1-beta1)* derivative[index]
+        v[index] = beta2 * v[index] + (1-beta2) * (np.power(derivative[index], 2))
 
-    mb = m / (1- beta1**epoch)
-    vb = v / (1- beta2**epoch)
+        mb = m[index] / (1- beta1**epoch)
+        vb = v[index] / (1- beta2**epoch)
 
-    opt_value = learning_rate * mb / (np.sqrt(vb) + 1e-7)
+        opt_values.append(-learning_rate * mb / (np.sqrt(vb) + 1e-7))
 
-    return opt_value
+    return opt_values, m, v
 
 def Adagrad_optimizer(derivative, learning_rate, cache):
     cache += np.power(derivative, 2)
@@ -130,13 +132,18 @@ def Adagrad_optimizer(derivative, learning_rate, cache):
 
     return opt_value
 
-def RMSProp(derivative, learning_rate, cache):
+def RMSProp_optimizer(derivative, learning_rate, cache):
     decay_rate = 0.01
 
     cache = decay_rate * cache + (1- decay_rate) * np.power(derivative, 2)
     opt_value = learning_rate * derivative / (np.sqrt(cache) + 1e-7)
-    
+
     return opt_value
+
+def update_adam(opt_values_weight, opt_values_bias, derivative_w, derivative_b):
+    for index, layer in enumerate(layers):
+        layer.w -= opt_values_weight[index] * derivative_w[index]
+        layer.b -= opt_values_bias[index] * derivative_b[index]
 
 
 # make layers
@@ -145,12 +152,54 @@ layers.append(Layer(input_dimension=1024, output_dimension=512, activation='relu
 layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
-# learning rate
-lr = 0.5
+##################
+# gradient decsent
+##################
 
-epochs = 3
+# learning rate
+# lr = 0.5
+
+# epochs = 3
+# losses = []
+# epochs_num = []
+
+# for i in range(epochs):
+#     print('epoch number: ', i)
+#     avg_loss = 0.
+
+#     for batch in range(5):
+#         print('batch number: ', batch+1)
+#         train_data, train_labels = load_batch_data_from_file(batch+1)
+
+#         x = train_data
+#         y = train_labels
+
+#         cache = feedforward(x)
+#         derivative_w, derivative_b, loss = backprop(y, cache)
+#         update(lr, derivative_w, derivative_b)
+
+#         avg_loss += loss
+    
+#     avg_loss = avg_loss/5
+#     print('avg ', avg_loss)
+#     losses.append(avg_loss)
+#     epochs_num.append(i)
+
+# plot_loss(losses, epochs_num)
+# plt.show()
+
+##################
+# Adam
+##################
+epochs = 10
 losses = []
 epochs_num = []
+
+m_weight_layers = []
+v_weight_layers = []
+
+m_bias_layers = []
+v_bias_layers = []
 
 for i in range(epochs):
     print('epoch number: ', i)
@@ -165,7 +214,22 @@ for i in range(epochs):
 
         cache = feedforward(x)
         derivative_w, derivative_b, loss = backprop(y, cache)
-        update(lr, derivative_w, derivative_b)
+
+        # initialize
+        if(batch == 0):
+            for index, layer in enumerate(layers):
+                m_weight_layers.append(np.zeros(derivative_w[index].shape))
+                v_weight_layers.append(np.zeros(derivative_w[index].shape))
+
+                m_bias_layers.append(np.zeros(derivative_b[index].shape))
+                v_bias_layers.append(np.zeros(derivative_b[index].shape))
+
+
+        opt_values_weight, m_weight_layers, v_weight_layers = Adam_optimizer(derivative=derivative_w, epoch=i+1, m = m_weight_layers, v = v_weight_layers, learning_rate=0.01)
+
+        opt_values_bias, m_bias_layers, v_bias_layers = Adam_optimizer(derivative=derivative_b, epoch=i+1, m = m_bias_layers, v = v_bias_layers, learning_rate=0.01)
+
+        update_adam(opt_values_weight, opt_values_bias, derivative_w, derivative_b)
 
         avg_loss += loss
     
@@ -176,16 +240,3 @@ for i in range(epochs):
 
 plot_loss(losses, epochs_num)
 plt.show()
-
-
-#############
-def get_acc(x, y):
-    acc = 0
-    for xx,yy in zip(x, y):
-        s = predict(xx)
-        if s == np.argmax(yy):
-            acc +=1
-    return acc/len(x)*100
-	
-# print("Training accuracy : ", get_acc(x_train, np.array(y_train)))
-# print("Test accuracy : ", get_acc(x_val, np.array(y_val)))
