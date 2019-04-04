@@ -126,11 +126,14 @@ def Adam_optimizer(derivative, epoch, m, v, learning_rate = 0.01):
 
     return opt_values, m, v
 
-def Adagrad_optimizer(derivative, learning_rate, cache):
-    cache += np.power(derivative, 2)
-    opt_value = learning_rate * derivative / (np.sqrt(cache) +1e-7) 
+def Adagrad_optimizer(derivative, cache_layers, learning_rate = 0.01):
 
-    return opt_value
+    opt_values = []
+    for index, layer in enumerate(layers):
+        cache_layers[index] += np.power(derivative[index], 2)
+        opt_values.append(learning_rate * derivative[index] / (np.sqrt(cache_layers[index]) +1e-7))
+
+    return opt_values, cache_layers
 
 def RMSProp_optimizer(derivative, learning_rate, cache):
     decay_rate = 0.01
@@ -140,7 +143,7 @@ def RMSProp_optimizer(derivative, learning_rate, cache):
 
     return opt_value
 
-def update_adam(opt_values_weight, opt_values_bias, derivative_w, derivative_b):
+def update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b):
     for index, layer in enumerate(layers):
         layer.w -= opt_values_weight[index] * derivative_w[index]
         layer.b -= opt_values_bias[index] * derivative_b[index]
@@ -152,91 +155,137 @@ layers.append(Layer(input_dimension=1024, output_dimension=512, activation='relu
 layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
-##################
-# gradient decsent
-##################
 
-# learning rate
-# lr = 0.5
+def gradient_decsent():
 
-# epochs = 3
-# losses = []
-# epochs_num = []
+    #learning rate
+    lr = 0.5
 
-# for i in range(epochs):
-#     print('epoch number: ', i)
-#     avg_loss = 0.
+    epochs = 3
+    losses = []
+    epochs_num = []
 
-#     for batch in range(5):
-#         print('batch number: ', batch+1)
-#         train_data, train_labels = load_batch_data_from_file(batch+1)
+    for i in range(epochs):
+        print('epoch number: ', i)
+        avg_loss = 0.
 
-#         x = train_data
-#         y = train_labels
+        for batch in range(5):
+            print('batch number: ', batch+1)
+            train_data, train_labels = load_batch_data_from_file(batch+1)
 
-#         cache = feedforward(x)
-#         derivative_w, derivative_b, loss = backprop(y, cache)
-#         update(lr, derivative_w, derivative_b)
+            x = train_data
+            y = train_labels
 
-#         avg_loss += loss
-    
-#     avg_loss = avg_loss/5
-#     print('avg ', avg_loss)
-#     losses.append(avg_loss)
-#     epochs_num.append(i)
+            cache = feedforward(x)
+            derivative_w, derivative_b, loss = backprop(y, cache)
+            update(lr, derivative_w, derivative_b)
 
-# plot_loss(losses, epochs_num)
-# plt.show()
+            avg_loss += loss
+        
+        avg_loss = avg_loss/5
+        print('avg ', avg_loss)
+        losses.append(avg_loss)
+        epochs_num.append(i)
 
-##################
-# Adam
-##################
-epochs = 10
-losses = []
-epochs_num = []
+    plot_loss(losses, epochs_num)
 
-m_weight_layers = []
-v_weight_layers = []
+def adam():
 
-m_bias_layers = []
-v_bias_layers = []
+    epochs = 10
+    losses = []
+    epochs_num = []
 
-for i in range(epochs):
-    print('epoch number: ', i)
-    avg_loss = 0.
+    m_weight_layers = []
+    v_weight_layers = []
 
-    for batch in range(5):
-        print('batch number: ', batch+1)
-        train_data, train_labels = load_batch_data_from_file(batch+1)
+    m_bias_layers = []
+    v_bias_layers = []
 
-        x = train_data
-        y = train_labels
+    for i in range(epochs):
+        print('epoch number: ', i)
+        avg_loss = 0.
 
-        cache = feedforward(x)
-        derivative_w, derivative_b, loss = backprop(y, cache)
+        for batch in range(5):
+            print('batch number: ', batch+1)
+            train_data, train_labels = load_batch_data_from_file(batch+1)
 
-        # initialize
-        if(batch == 0):
-            for index, layer in enumerate(layers):
-                m_weight_layers.append(np.zeros(derivative_w[index].shape))
-                v_weight_layers.append(np.zeros(derivative_w[index].shape))
+            x = train_data
+            y = train_labels
 
-                m_bias_layers.append(np.zeros(derivative_b[index].shape))
-                v_bias_layers.append(np.zeros(derivative_b[index].shape))
+            cache = feedforward(x)
+            derivative_w, derivative_b, loss = backprop(y, cache)
+
+            # initialize
+            if(batch == 0):
+                for index, layer in enumerate(layers):
+                    m_weight_layers.append(np.zeros(derivative_w[index].shape))
+                    v_weight_layers.append(np.zeros(derivative_w[index].shape))
+
+                    m_bias_layers.append(np.zeros(derivative_b[index].shape))
+                    v_bias_layers.append(np.zeros(derivative_b[index].shape))
 
 
-        opt_values_weight, m_weight_layers, v_weight_layers = Adam_optimizer(derivative=derivative_w, epoch=i+1, m = m_weight_layers, v = v_weight_layers, learning_rate=0.01)
+            opt_values_weight, m_weight_layers, v_weight_layers = Adam_optimizer(derivative=derivative_w, epoch=i+1, m = m_weight_layers, v = v_weight_layers, learning_rate=0.01)
 
-        opt_values_bias, m_bias_layers, v_bias_layers = Adam_optimizer(derivative=derivative_b, epoch=i+1, m = m_bias_layers, v = v_bias_layers, learning_rate=0.01)
+            opt_values_bias, m_bias_layers, v_bias_layers = Adam_optimizer(derivative=derivative_b, epoch=i+1, m = m_bias_layers, v = v_bias_layers, learning_rate=0.01)
 
-        update_adam(opt_values_weight, opt_values_bias, derivative_w, derivative_b)
+            update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b)
 
-        avg_loss += loss
-    
-    avg_loss = avg_loss/5
-    print('avg ', avg_loss)
-    losses.append(avg_loss)
-    epochs_num.append(i)
+            avg_loss += loss
+        
+        avg_loss = avg_loss/5
+        print('avg ', avg_loss)
+        losses.append(avg_loss)
+        epochs_num.append(i)
 
-plot_loss(losses, epochs_num)
-plt.show()
+    plot_loss(losses, epochs_num)
+
+def adagrad():
+    epochs = 10
+    losses = []
+    epochs_num = []
+
+    cache_weight_layers = []
+    cache_bias_layers = []
+
+
+    for i in range(epochs):
+        print('epoch number: ', i)
+        avg_loss = 0.
+
+        for batch in range(5):
+            print('batch number: ', batch+1)
+            train_data, train_labels = load_batch_data_from_file(batch+1)
+
+            x = train_data
+            y = train_labels
+
+            cache = feedforward(x)
+            derivative_w, derivative_b, loss = backprop(y, cache)
+
+            # initialize
+            if(batch == 0):
+                for index, layer in enumerate(layers):
+                    cache_weight_layers.append(np.zeros(derivative_w[index].shape))
+                    cache_bias_layers.append(np.zeros(derivative_b[index].shape))
+
+
+            opt_values_weight, cache_weight_layers = Adagrad_optimizer(derivative=derivative_w, cache_layers=cache_weight_layers, learning_rate=0.01)
+
+            opt_values_bias, cache_bias_layers = Adagrad_optimizer(derivative=derivative_b, 
+            cache_layers=cache_bias_layers, learning_rate=0.01)
+
+            update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b)
+
+            avg_loss += loss
+        
+        avg_loss = avg_loss/5
+        print('avg ', avg_loss)
+        losses.append(avg_loss)
+        epochs_num.append(i)
+
+    plot_loss(losses, epochs_num)
+
+def RMSProp():
+
+    return
