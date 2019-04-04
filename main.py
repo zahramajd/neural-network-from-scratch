@@ -109,6 +109,35 @@ def load_batch_data_from_file(index):
 def plot_loss(losses, epochs):
     plt.plot(epochs, losses, color='red')
     
+def Adam_optimizer(derivative, learning_rate, epoch, m, v):
+    
+    beta1 = 0.9
+    beta2 = 0.999
+
+    m = beta1 * m + (1-beta1)* derivative
+    v = beta2 * v + (1-beta2) * (np.power(derivative, 2))
+
+    mb = m / (1- beta1**epoch)
+    vb = v / (1- beta2**epoch)
+
+    opt_value = learning_rate * mb / (np.sqrt(vb) + 1e-7)
+
+    return opt_value
+
+def Adagrad_optimizer(derivative, learning_rate, cache):
+    cache += np.power(derivative, 2)
+    opt_value = learning_rate * derivative / (np.sqrt(cache) +1e-7) 
+
+    return opt_value
+
+def RMSProp(derivative, learning_rate, cache):
+    decay_rate = 0.01
+
+    cache = decay_rate * cache + (1- decay_rate) * np.power(derivative, 2)
+    opt_value = learning_rate * derivative / (np.sqrt(cache) + 1e-7)
+    
+    return opt_value
+
 
 # make layers
 layers = []
