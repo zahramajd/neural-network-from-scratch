@@ -152,7 +152,7 @@ def update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b):
 
 # make layers
 layers = []
-layers.append(Layer(input_dimension=1024, output_dimension=512, activation='relu'))
+layers.append(Layer(input_dimension=1024, output_dimension=512, activation='lrelu'))
 layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
@@ -333,4 +333,4 @@ def RMSProp():
 
     plot_loss(losses, epochs_num)
 
-RMSProp()
+gradient_decsent()

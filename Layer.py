@@ -16,12 +16,13 @@ class Layer:
         self.w = np.random.randn(input_dimension, output_dimension)
         self.b = np.zeros((1, output_dimension))
 
-
     def forward(self, x_in):
         z = np.dot(x_in, self.w) + self.b
         # a = self.sigmoid(z)
         if(self.activation == 'relu'):
             a = self.relu(z)
+        if(self.activation == 'lrelu'):
+            a = self.lrelu(z)
         if(self.activation == 'sigmoid'):
             a = self.sigmoid(z)
         return a
@@ -29,6 +30,8 @@ class Layer:
     def backward(self, a):
         if(self.activation == 'relu'):
             da = self.relu_derv(a)
+        if(self.activation == 'lrelu'):
+            da = self.lrelu_derv(a)
         if(self.activation == 'sigmoid'):
             da = self.sigmoid_derv(a)
 
@@ -46,4 +49,14 @@ class Layer:
     def relu_derv(self, s):
         ds = np.ones(s.shape)
         ds[s <= 0] = 0
+        return ds
+
+    def lrelu(self, s):
+        alpha=0.01
+        return  np.where(s > 0, s, s * alpha) 
+
+    def lrelu_derv(self, s):
+        alpha=0.01
+        ds = np.ones(s.shape)
+        ds[s <= 0] = alpha
         return ds
