@@ -147,12 +147,17 @@ def update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b):
 
 def predict():
     test_data, test_labels = load_test_from_file()
-    
-    return 
+    cache = feedforward(test_data)
+    return test_labels, cache[-1]
 
-def compute_accuracy():
+def compute_accuracy(labels, predicted):
+    acc = 0
+    for i in range(len(labels)):
+        if(np.argmax(predicted[i]) == np.argmax(labels[i])):
+            acc +=1
 
-    return
+    return acc/len(labels)*100
+
 
 ## methods
 def gradient_decsent():
@@ -190,7 +195,7 @@ def gradient_decsent():
 
 def adam():
 
-    epochs = 10
+    epochs = 100
     losses = []
     epochs_num = []
 
@@ -339,5 +344,7 @@ layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmo
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
 
-# gradient_decsent()
-predict()
+adam()
+test_labels, predicted = predict()
+acc = compute_accuracy(test_labels, predicted)
+print('acc ', acc)
