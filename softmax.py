@@ -11,4 +11,7 @@ class Softmax:
         x_out = np.apply_along_axis(self.softmax, 1, x_in)
         return x_out
 
+    def backward(self):
+        return 1
+
 

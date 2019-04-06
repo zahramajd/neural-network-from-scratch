@@ -12,28 +12,28 @@ def load_data():
             dict = pickle.load(fo, encoding='bytes')
         return dict
 
-    train_data = unpickle('cifar-10-batches-py/data_batch_5')[b'data']
-    train_labels = unpickle('cifar-10-batches-py/data_batch_5')[b'labels']
+    # train_data = unpickle('cifar-10-batches-py/data_batch_5')[b'data']
+    # train_labels = unpickle('cifar-10-batches-py/data_batch_5')[b'labels']
 
-    # test_data = unpickle('cifar-10-batches-py/test_batch')[b'data']
-    # test_labels = unpickle('cifar-10-batches-py/test_batch')[b'labels']
-    return train_data, train_labels
+    test_data = unpickle('cifar-10-batches-py/test_batch')[b'data']
+    test_labels = unpickle('cifar-10-batches-py/test_batch')[b'labels']
+    return test_data, test_labels
 
 def load_new_data():
-    train_data, train_labels  = load_data()
+    test_data, test_labels  = load_data()
 
-    train_data = make_feature_vector(train_data)
-    # test_data = make_feature_vector(test_data)
-    train_labels = one_hot(np.asarray(train_labels),10)
-    # test_labels = one_hot(np.asarray(test_labels),10)
+    # train_data = make_feature_vector(train_data)
+    test_data = make_feature_vector(test_data)
+    # train_labels = one_hot(np.asarray(train_labels),10)
+    test_labels = one_hot(np.asarray(test_labels),10)
 
-    np.savetxt('converted_data/train_data_5.txt', train_data, fmt='%f')
-    # np.savetxt('converted_data/test_data.txt', test_data, fmt='%f')
+    # np.savetxt('converted_data/train_data_5.txt', train_data, fmt='%f')
+    np.savetxt('converted_data/test_data.txt', test_data, fmt='%f')
 
-    np.savetxt('converted_data/train_labels_5.txt', train_labels, fmt='%f')
-    # np.savetxt('converted_data/test_labels.txt', test_labels, fmt='%f')
+    # np.savetxt('converted_data/train_labels_5.txt', train_labels, fmt='%f')
+    np.savetxt('converted_data/test_labels.txt', test_labels, fmt='%f')
 
-    return train_data, train_labels
+    return test_data, test_labels
 
 def load_test_from_file():
     test_data = np.loadtxt('converted_data/test_data.txt', dtype=float)
@@ -127,7 +127,7 @@ def Adagrad_optimizer(derivative, cache_layers, learning_rate = 0.01):
     opt_values = []
     for index, layer in enumerate(layers):
         cache_layers[index] += np.power(derivative[index], 2)
-        opt_values.append(learning_rate * derivative[index] / (np.sqrt(cache_layers[index]) +1e-7))
+        opt_values.append(-learning_rate * derivative[index] / (np.sqrt(cache_layers[index]) +1e-7))
 
     return opt_values, cache_layers
 
@@ -136,7 +136,7 @@ def RMSProp_optimizer(derivative, cache_layers, learning_rate = 0.01):
     opt_values = []
     for index, layer in enumerate(layers):
         cache_layers[index] = decay_rate * cache_layers[index] + (1- decay_rate) * np.power(derivative[index], 2)
-        opt_values.append(learning_rate * derivative[index] / (np.sqrt(cache_layers[index]) + 1e-7))
+        opt_values.append(-learning_rate * derivative[index] / (np.sqrt(cache_layers[index]) + 1e-7))
 
     return opt_values, cache_layers
 
@@ -147,7 +147,8 @@ def update2(opt_values_weight, opt_values_bias, derivative_w, derivative_b):
 
 def predict():
     test_data, test_labels = load_test_from_file()
-    cache = feedforward(test_data)
+    cache = feedforward(test_data[0])
+    print('fgh',cache[-1])
     return test_labels, cache[-1]
 
 def compute_accuracy(labels, predicted):
@@ -165,7 +166,7 @@ def gradient_decsent():
     #learning rate
     lr = 0.5
 
-    epochs = 3
+    epochs = 40
     losses = []
     epochs_num = []
 
@@ -193,9 +194,8 @@ def gradient_decsent():
 
     plot_loss(losses, epochs_num)
 
-def adam():
+def adam(epochs):
 
-    epochs = 100
     losses = []
     epochs_num = []
 
@@ -244,8 +244,8 @@ def adam():
 
     plot_loss(losses, epochs_num)
 
-def adagrad():
-    epochs = 10
+def adagrad(epochs):
+
     losses = []
     epochs_num = []
 
@@ -290,8 +290,7 @@ def adagrad():
 
     plot_loss(losses, epochs_num)
 
-def RMSProp():
-    epochs = 10
+def RMSProp(epochs):
     losses = []
     epochs_num = []
 
@@ -339,12 +338,39 @@ def RMSProp():
 
 # make layers
 layers = []
-layers.append(Layer(input_dimension=1024, output_dimension=512, activation='lrelu'))
+layers.append(Layer(input_dimension=1024, output_dimension=512, activation='relu'))
+layers.append(Layer(input_dimension=512, output_dimension=512, activation='relu'))
+layers.append(Layer(input_dimension=512, output_dimension=512, activation='relu'))
+layers.append(Layer(input_dimension=512, output_dimension=512, activation='relu'))
 layers.append(Layer(input_dimension=512, output_dimension=128, activation='sigmoid'))
 layers.append(Layer(input_dimension=128, output_dimension=10, activation='sigmoid'))
 
 
-adam()
-test_labels, predicted = predict()
-acc = compute_accuracy(test_labels, predicted)
-print('acc ', acc)
+adam(100)
+
+
+# test_labels, predicted = predict()
+# acc = compute_accuracy(test_labels, predicted)
+# print('acc ', acc)
+
+def predict2(data):
+    cache = feedforward(data)
+    return cache[-1].argmax()
+
+
+def get_acc2(x, y):
+    acc = 0
+    for xx,yy in zip(x, y):
+        s = predict2(xx)
+        if s == np.argmax(yy):
+            acc +=1
+    return acc/len(x)*100
+
+test_data, test_labels = load_test_from_file()
+print('acc ', get_acc2(test_data, test_labels))
+
+
+plt.xlabel("epoch")
+plt.ylabel("loss")
+plt.title('Adam, 4 layer')
+plt.show()
